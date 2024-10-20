@@ -127,8 +127,8 @@ class File implements TaskStoreInterface
             return;
         }
 
-        file_put_contents($file, $task);
-        // \React\Async\await( app('reactphp.filesystem')->file($file)->putContents($task));
+        // file_put_contents($file, $task);
+        \React\Async\await( app('reactphp.filesystem')->file($file)->putContents($task));
         $this->cacheTask($task);
     }
 
@@ -187,8 +187,8 @@ class File implements TaskStoreInterface
         $this->listCaches[$listName] = $list;
         $this->cacheList($listName, $list);
         $file = $this->getListFilePath($listName);
-        file_put_contents($file, json_encode($list));
-        // \React\Async\await(app('reactphp.filesystem')->dete->file($file)->putContents(json_encode($list)));
+        // file_put_contents($file, json_encode($list));
+        \React\Async\await(app('reactphp.filesystem')->file($file)->putContents(json_encode($list)));
     }
 
     /**
