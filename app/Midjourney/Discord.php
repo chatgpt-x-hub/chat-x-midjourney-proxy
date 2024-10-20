@@ -191,9 +191,9 @@ class Discord
                 public function reconnect($delay)
                 {
                     $this->conn->close();
-                    Loop::addTimer($delay, function () {
+                    Loop::addTimer($delay, \React\Async\async(function () {
                         $this->discord->createWss();
-                    });
+                    }));
                 }
             };
 
@@ -227,10 +227,10 @@ class Discord
                 switch ($code) {
                     case Discord::MESSAGE_OPTION_HELLO:
                         $this->handleHello($data);
-                        $this->login();
+                        \React\Async\async(fn() => $this->login());
                         break;
                     case Discord::MESSAGE_OPTION_DISPATCH:
-                        $this->handleDispatch($data);
+                        \React\Async\async(fn() => $this->handleDispatch($data));
                         break;
                     case Discord::MESSAGE_OPTION_HEARTBEAT_ACK:
                         $this->heartbeatAck = true;
@@ -259,7 +259,7 @@ class Discord
 
     protected function createTimeoutTimer()
     {
-        Loop::addTimer(60, function () {
+        Loop::addTimer(60, \React\Async\async(function () {
             foreach ($this->getRunningTasks() as $task) {
                 if ($task->startTime() + $this->timeoutMinutes * 60 < time()) {
                      $task->removeFromList(static::getRunningListName($this->id));
@@ -269,7 +269,7 @@ class Discord
                      $this->failed($task, "任务超时");
                 }
             }
-        });
+        }));
     }
 
     public function id()

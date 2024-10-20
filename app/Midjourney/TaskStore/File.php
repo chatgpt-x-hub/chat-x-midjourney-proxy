@@ -58,9 +58,9 @@ class File implements TaskStoreInterface
     {
         // 找到第二天凌晨1点的时间戳
         $seconds = strtotime(date('Y-m-d', time() + 86400)) - time() + 3600;
-        Loop::addTimer($seconds, function () {
+        Loop::addTimer($seconds, \React\Async\async(function () {
             $this->clearExpiredTasks($this->expiredDates);
-        }, [], false);
+        }));
     }
 
     protected function clearExpiredTasks($expiredDates) {
@@ -107,7 +107,8 @@ class File implements TaskStoreInterface
         if (!$file || !is_file($file)) {
             return null;
         }
-        $data = file_get_contents($file);
+        // $data = file_get_contents($file);
+        $data = \React\Async\await(app('reactphp.filesystem')->file($file)->getContents());
         $task = $data ? Task::unserialize($data) : null;
         if ($task) {
             $this->cacheTask($task);
@@ -144,7 +145,7 @@ class File implements TaskStoreInterface
             return $this->listCaches[$listName];
         }
         $file = $this->getListFilePath($listName);
-        if (is_file($file) && $content = file_get_contents($file)) {
+        if (is_file($file) && $content = app('reactphp.filesystem')->file($file)->getContents()) {
             return json_decode($content, true) ?: [];
         }
         return [];
@@ -179,7 +180,8 @@ class File implements TaskStoreInterface
         $this->listCaches[$listName] = $list;
         $this->cacheList($listName, $list);
         $file = $this->getListFilePath($listName);
-        file_put_contents($file, json_encode($list));
+        // file_put_contents($file, json_encode($list));
+        \React\Async\await(app('reactphp.filesystem')->file($file)->putContents(json_encode($list)));
     }
 
     /**
