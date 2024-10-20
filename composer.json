@@ -22,6 +22,7 @@
         "jenssegers/agent": "^2.6",
         "laravel-zero/framework": "^11.0.0",
         "ratchet/pawl": "^0.4.1",
+        "reactphp-x/concurrent": "^1.0",
         "reactphp-x/crontab": "^1.0",
         "reactphp-x/laravel-log": "^1.0",
         "reactphp-x/laravel-reactphp": "^1.0",

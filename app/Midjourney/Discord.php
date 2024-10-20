@@ -29,11 +29,7 @@ use App\Midjourney\MessageHandler\VaryRegionStart;
 use App\Midjourney\MessageHandler\VaryRegionProgress;
 use App\Midjourney\Service\Image;
 use App\Midjourney\Task;
-use Workerman\Connection\AsyncTcpConnection;
-use Workerman\Connection\TcpConnection;
 use App\Midjourney\Utils\Client;
-use App\Midjourney\Utils\Zlib;
-use Workerman\Worker;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Config;
 use App\Midjourney\Exceptions\BusinessException;
@@ -133,15 +129,6 @@ class Discord
     public function createWss()
     {
         $gateway = static::getGateway();
-        $transport = 'tcp';
-        if (strpos($gateway, 'wss://') === 0) {
-            $gateway = str_replace('wss://', 'ws://', $gateway);
-            $transport = 'ssl';
-        }
-        if (strpos(':', $gateway) === false) {
-            $gateway .=  $transport === 'ssl' ? ':443' : ':80';
-        }
-
         $connector = null;
 
         if (config('midjourney.http_proxy')) {
@@ -162,20 +149,24 @@ class Discord
             'Sec-Websocket-Extensions' => 'permessage-deflate; client_max_window_bits',
             'User-Agent' => $this->useragent,
             'Origin' => 'https://discord.com',
-        ])->then(function ($this, $conn) {
+        ])->then(function ($conn) {
+            Log::info("DISCORD:{$this->id()} WSS Connected");
             $this->gatewayConnection = new class ($this, $conn) {
                 protected $state = 1;
+                public $context = 1;
                 public function __construct(protected $discord, protected $conn)
                 {
-                    $this->conn = $conn;
-                    $this->conn->on('close', function () {
+                    $conn->on('close', function () {
                         $this->state = 0;
                     });
+                    $this->context = new class {
+                        public $inflator;
+                    };
                 }
 
                 public function send($data)
                 {
-                    $this->conn->send(json_encode($data));
+                    $this->conn->send($data);
                 }
 
                 public function getStatus()
@@ -185,12 +176,12 @@ class Discord
 
                 public function close()
                 {
+                    Log::info("DISCORD:{$this->discord->id()} WSS Closed 1");
                     $this->conn->close();
                 }
 
                 public function reconnect($delay)
                 {
-                    $this->conn->close();
                     Loop::addTimer($delay, \React\Async\async(function () {
                         $this->discord->createWss();
                     }));
@@ -198,10 +189,10 @@ class Discord
             };
 
             Log::debug("DISCORD:{$this->id()} WSS Connected");
-            $conn->on('message', function($data) use ($conn) {
+            $conn->on('message', function ($data) use ($conn) {
                 // 解析discord数据
                 try {
-                    $json = (new Zlib($data))->decompress(ZLIB_ENCODING_DEFLATE);
+                    $json = static::inflate($this->gatewayConnection, $data);
                 } catch (Throwable $e) {
                     Log::error("DISCORD:{$this->id()} zlib stream inflate error data:" . bin2hex($data) . " " . $e->getMessage());
                     Loop::stop();
@@ -227,13 +218,14 @@ class Discord
                 switch ($code) {
                     case Discord::MESSAGE_OPTION_HELLO:
                         $this->handleHello($data);
-                        \React\Async\async(fn() => $this->login());
+                        \React\Async\async(fn() => $this->login())();
                         break;
                     case Discord::MESSAGE_OPTION_DISPATCH:
-                        \React\Async\async(fn() => $this->handleDispatch($data));
+                        \React\Async\async(fn() => $this->handleDispatch($data))();
                         break;
                     case Discord::MESSAGE_OPTION_HEARTBEAT_ACK:
                         $this->heartbeatAck = true;
+                        Log::info("DISCORD:{$this->id()} WSS Heartbeat Ack");
                         break;
                 }
             });
@@ -243,7 +235,7 @@ class Discord
                 Log::error("DISCORD:{$this->id()} WSS Error " . $e->getMessage());
             });
 
-            $conn->on('close', function() {
+            $conn->on('close', function($code, $reason) {
                 Log::info("DISCORD:{$this->id()} WSS Closed");
                 $this->heartbeatAck = true;
                 $this->gatewayConnection->reconnect(1);
@@ -582,7 +574,10 @@ class Discord
         if ($this->heartbeatTimer) {
             Loop::cancelTimer($this->heartbeatTimer);
         }
-        $this->heartbeatTimer = Loop::addTimer($data['d']['heartbeat_interval']/1000 ?? 41.25, function () {
+        Log::debug("DISCORD:{$this->id()} WSS Hello", [
+            'heartbeat_interval' => $data['d']['heartbeat_interval']/1000 ?? 41.25,
+        ]);
+        $this->heartbeatTimer = Loop::addPeriodicTimer($data['d']['heartbeat_interval']/1000 ?? 41.25, \React\Async\async(function () {
             if (!$this->heartbeatAck) {
                 Log::error("DISCORD:{$this->id()} WSS Heartbeat timeout");
                 $this->gatewayConnection->close();
@@ -590,12 +585,13 @@ class Discord
             }
             $this->heartbeatAck = false;
             if ($this->gatewayConnection->getStatus() === 1) {
+                Log::debug("DISCORD:{$this->id()} WSS Send Heartbeat");
                 $this->send([
                     'op' => Discord::MESSAGE_OPTION_HEARTBEAT,
                     'd' => $this->sequence,
                 ]);
             }
-        }, null);
+        }));
     }
 
     protected function send($data)

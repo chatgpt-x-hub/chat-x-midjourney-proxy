@@ -15,7 +15,7 @@ return [
             'timeoutMinutes' => 10, // 10分钟后超时
         ]
     ],
-    'http_proxy' => env('HTTP_PROXY', '10.10.10.2:7890'), // http 代理
+    'http_proxy' => env('MIDJOURNEY_HTTP_PROXY', '10.10.10.2:7890'), // http 代理
     'proxy' => [
         'server' => 'https://discord.com',      // 国内需要代理
         'cdn' => 'https://cdn.discordapp.com',  // 国内需要代理

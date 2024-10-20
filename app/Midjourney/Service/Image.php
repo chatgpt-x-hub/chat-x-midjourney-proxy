@@ -40,12 +40,13 @@ class Image
         return [
             'method' => 'POST',
             'headers' => [
+                'Content-Type' => 'application/x-www-form-urlencoded',
                 'Authorization' => $discord->token(),
                 'User-Agent' => $discord->useragent(),
             ],
-            'data' => [
+            'data' => http_build_query([
                 'payload_json' => json_encode($params)
-            ],
+            ]),
             'success' => function ($response) use ($task, $discord) {
                 static::successCallback($response, $task);
             },

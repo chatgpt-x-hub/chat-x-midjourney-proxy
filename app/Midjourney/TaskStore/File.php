@@ -25,6 +25,8 @@ class File implements TaskStoreInterface
 
     protected $expiredDates = 30;
 
+    protected $concurrent;
+
     /**
      * @param array $config
      * @param int $expiredDates
@@ -36,6 +38,7 @@ class File implements TaskStoreInterface
         if (!$path) {
             throw new BusinessException('data_path empty');
         }
+        $this->concurrent = new \ReactphpX\Concurrent\Concurrent(1);
         $this->taskPath = $path . DIRECTORY_SEPARATOR . 'tasks';
         $this->listPath = $path . DIRECTORY_SEPARATOR . 'lists';
         $this->cacheSize = $config['cacheSize'] ?? $this->cacheSize;
@@ -123,7 +126,9 @@ class File implements TaskStoreInterface
         if (!$file) {
             return;
         }
+
         file_put_contents($file, $task);
+        // \React\Async\await( app('reactphp.filesystem')->file($file)->putContents($task));
         $this->cacheTask($task);
     }
 
@@ -146,7 +151,8 @@ class File implements TaskStoreInterface
             return $this->listCaches[$listName];
         }
         $file = $this->getListFilePath($listName);
-        if (is_file($file) && $content = app('reactphp.filesystem')->file($file)->getContents()) {
+        if (is_file($file) && $content = \React\Async\await(app('reactphp.filesystem')->file($file)->getContents())) {
+        // if (is_file($file) && $content = file_get_contents($file)) {
             return json_decode($content, true) ?: [];
         }
         return [];
@@ -181,8 +187,8 @@ class File implements TaskStoreInterface
         $this->listCaches[$listName] = $list;
         $this->cacheList($listName, $list);
         $file = $this->getListFilePath($listName);
-        // file_put_contents($file, json_encode($list));
-        \React\Async\await(app('reactphp.filesystem')->file($file)->putContents(json_encode($list)));
+        file_put_contents($file, json_encode($list));
+        // \React\Async\await(app('reactphp.filesystem')->dete->file($file)->putContents(json_encode($list)));
     }
 
     /**

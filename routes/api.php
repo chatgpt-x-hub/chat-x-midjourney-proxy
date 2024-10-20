@@ -8,7 +8,17 @@ use Illuminate\Support\Facades\Log;
 use App\Midjourney\Discord;
 use App\Midjourney\Task;
 
-Task::init($config['midjourney.store']);
+use React\EventLoop\Loop;
+
+
+// Loop::addTimer(10, \React\Async\async(function () {
+//     echo "Hello world\n";
+//     app('reactphp.filesystem')->file('/root/Code/chat-x-midjourney/storage/app/data/midjourney/lists/discord-pending-tasks')->putContents('22222')->then(function () {
+//         echo "File cleared\n";
+//     });
+// }));
+
+Task::init(Config::get('midjourney.store'));
 
 foreach (Config::get('midjourney.accounts') as $account) {
     if (isset($account['enable']) && !$account['enable']) {
@@ -30,17 +40,19 @@ Route::get('/', function (ServerRequestInterface $request) {
 });
 
 $class = new class {
-    public function index(ServerRequestInterface $request) {
+    public function index(ServerRequestInterface $request)
+    {
         return Response::plaintext(
             "Hello wörld!\n"
         );
     }
 };
 
-Route::get('/at', get_class($class).'@index');
+Route::get('/at', get_class($class) . '@index');
 
-Route::group('/api', [
-    function($request, $next) {
+Route::group(
+    '/api',
+    function ($request, $next) {
         try {
             return \React\Async\async(fn() => $next($request))();
         } catch (Throwable $e) {
@@ -52,11 +64,12 @@ Route::group('/api', [
                 'ban-words' => $e->banWord ?? ''
             ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
         }
+    },
+    function () {
+        Route::post('/imagine', 'App\Midjourney\Controller\Image@imagine');
+        Route::post('/action', 'App\Midjourney\Controller\Image@action');
+        Route::post('/blend', 'App\Midjourney\Controller\Image@blend');
+        Route::post('/describe', 'App\Midjourney\Controller\Image@describe');
+        Route::get('/task', 'App\Midjourney\Controller\Task@fetch');
     }
-],function () {
-    Route::post('/imagine', 'App\Midjourney\Controller\Image@imagine');
-    Route::post('/action', 'App\Midjourney\Controller\Image@action');
-    Route::post('/blend', 'App\Midjourney\Controller\Image@blend');
-    Route::post('/describe', 'App\Midjourney\Controller\Image@describe');
-    Route::get('/task', 'App\Midjourney\Controller\Task@fetch');
-});
+);

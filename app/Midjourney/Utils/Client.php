@@ -4,6 +4,7 @@ namespace App\Midjourney\Utils;
 
 use React\Http\Browser;
 use function React\Async\await;
+use Illuminate\Support\Facades\Log;
 
 class Client
 {
@@ -45,18 +46,25 @@ class Client
 
     public function request($url, $options)
     {
-
-       
-        return $this->browser->request($options['method'], $url, $options['headers'] ?? [] ,  is_array($options['data']) ?  json_encode($options['data']) : $options['data'])->then(
+        return $this->browser->request($options['method'], $url, $options['headers'] ?? [],  is_array($options['data']) ?  json_encode($options['data']) : $options['data'])->then(
             function ($response) use ($options) {
                 if (isset($options['success'])) {
-                    $options['success']($response);
+                    \React\Async\async(fn() => $options['success']($response));
                 }
                 return $response;
             },
             function ($e) use ($options) {
                 if (isset($options['error'])) {
-                    $options['error']($e);
+                    \React\Async\async(fn() => $options['error']($e));
+                }
+                if ($e instanceof \React\Http\Message\ResponseException) {
+                    $response = $e->getResponse();
+                    \React\Async\async(fn() => Log::error($e->getMessage(), [
+                        'response' => [
+                            'status' => $response->getStatusCode(),
+                            'body' => (string) $response->getBody(),
+                        ]
+                    ]));
                 }
                 throw $e;
             }
@@ -65,7 +73,6 @@ class Client
 
     public function requestStreaming($url, $options)
     {
-        return $this->browser->requestStreaming($options['method'], $url, $options['headers'] ?? [] ,  is_array($options['data']) ?  json_encode($options['data']) : $options['data']);
+        return $this->browser->requestStreaming($options['method'], $url, $options['headers'] ?? [],  is_array($options['data']) ?  json_encode($options['data']) : $options['data']);
     }
-
 }
