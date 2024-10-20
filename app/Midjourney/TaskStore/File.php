@@ -66,6 +66,7 @@ class File implements TaskStoreInterface
     protected function clearExpiredTasks($expiredDates) {
         $this->createClearTaskTimer();
         $dirs = scandir($this->taskPath);
+        // todo async file delete
         try {
             foreach ($dirs as $dir) {
                 if ($dir === '.' || $dir === '..') {

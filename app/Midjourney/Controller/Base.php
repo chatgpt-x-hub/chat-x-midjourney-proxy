@@ -146,7 +146,7 @@ class Base
      */
     protected function containBannedWords($prompt, string &$word = ''): bool
     {
-        $bannedWordsFile = base_path('config/plugin/webman/midjourney/banned-words.txt');
+        $bannedWordsFile = base_path('config/banned-words.txt');
         if (!$prompt || !file_exists($bannedWordsFile)) {
             return false;
         }

@@ -15,6 +15,6 @@
  *   +------------- sec (0-59)
  */
 return [
-    'enabled' => true,
+    'enabled' => false,
     'every_second' => '* * * * * *',
 ];

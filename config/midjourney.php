@@ -7,9 +7,9 @@ return [
     'accounts' => [
         [
             'enable' => true,
-            'token' => '',
-            'guild_id' => '',
-            'channel_id' => '',
+            'token' => env('DISCORD_BOT_TOKEN', ''),
+            'guild_id' => env('DISCORD_GUILD_ID', ''),
+            'channel_id' => env('DISCORD_CHANNEL_ID', ''),
             'useragent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.30 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.30',
             'concurrency' => 3, // 并发数
             'timeoutMinutes' => 10, // 10分钟后超时
