@@ -1,0 +1,8 @@
+#  vendor
+.env
+.git
+docker
+node_modules
+bun.lockb
+storage/logs/*
+storage/app/*

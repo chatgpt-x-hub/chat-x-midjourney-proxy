@@ -38,7 +38,6 @@ class File implements TaskStoreInterface
         if (!$path) {
             throw new BusinessException('data_path empty');
         }
-        $this->concurrent = new \ReactphpX\Concurrent\Concurrent(1);
         $this->taskPath = $path . DIRECTORY_SEPARATOR . 'tasks';
         $this->listPath = $path . DIRECTORY_SEPARATOR . 'lists';
         $this->cacheSize = $config['cacheSize'] ?? $this->cacheSize;
