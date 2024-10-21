@@ -75,4 +75,13 @@ class Client
     {
         return $this->browser->requestStreaming($options['method'], $url, $options['headers'] ?? [],  is_array($options['data']) ?  json_encode($options['data']) : $options['data']);
     }
+
+    public function get($url, $success, $error)
+    {
+        return $this->request($url, [
+            'method' => 'GET',
+            'success' => $success,
+            'error' => $error
+        ]);
+    }
 }

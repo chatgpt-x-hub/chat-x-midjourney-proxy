@@ -17,10 +17,10 @@ return [
     ],
     'http_proxy' => env('MIDJOURNEY_HTTP_PROXY', '10.10.10.2:7890'), // http 代理
     'proxy' => [
-        'server' => 'https://discord.com',      // 国内需要代理
-        'cdn' => 'https://cdn.discordapp.com',  // 国内需要代理
-        'gateway' => 'wss://gateway.discord.gg', // 国内需要代理
-        'upload' => 'https://discord-attachments-uploads-prd.storage.googleapis.com', // 国内需要代理
+        'server' => env('DISCORD_SERVER_URL','https://discord.com'),      // 国内需要代理
+        'cdn' => env('DISCORD_CDN_URL', 'https://cdn.discordapp.com'),  // 国内需要代理
+        'gateway' => env('DISCORD_GATEWAY_URL', 'wss://gateway.discord.gg'), // 国内需要代理
+        'upload' => env('DISCORD_UPLOAD_URL', 'https://discord-attachments-uploads-prd.storage.googleapis.com'), // 国内需要代理
     ],
     'store' => [
         'handler' => File::class,
@@ -31,9 +31,9 @@ return [
     ],
     'settings' => [
         'debug' => false,  // 调试模式会显示更多信息在终端
-        'secret' => '',    // 接口密钥，不为空时需要在请求头 mj-api-secret 中传递
-        'notifyUrl' => '', // webman ai项目请留空
-        'apiPrefix' => '', // 接口前缀
+        'secret' => env('MJ-API-SECRET', ''),    // 接口密钥，不为空时需要在请求头 mj-api-secret 中传递
+        'notifyUrl' => env('MI_NOTIFY_URL', ''), // webman ai项目请留空
+        'apiPrefix' => env('MJ_API_PREFIX', ''), // 接口前缀
         'tmpPath' => storage_path('app') . '/tmp/midjourney' // 上传文件临时目录
     ]
 ];
