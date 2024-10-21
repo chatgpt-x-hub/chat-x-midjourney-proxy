@@ -55,7 +55,8 @@ Route::group(
     function ($request, $next) {
         try {
             if (config('midjourney.settings.secret')) {
-                if ($request->getHeaderLine('mj-api-secret') !== config('midjourney.settings.secret')) {
+                $secrets = explode(',', config('midjourney.settings.secret'));
+                if (!in_array($request->getHeaderLine('mj-api-secret'), $secrets)) {
                     return new Response(200, ['Content-Type' => 'application/json'], json_encode([
                         'code' => 403,
                         'msg' => '403 Api Secret 错误',

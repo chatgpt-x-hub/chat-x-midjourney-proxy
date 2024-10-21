@@ -1,18 +1,18 @@
 {
-    "name": "reactphp-x/reactphp-x",
-    "description": "The Reactphp Framework build top of Framework X and Larave zero.",
-    "keywords": ["Reactphp", "framework", "laravel", "laravel zero", "console", "cli"],
+    "name": "chatgpt-x-hub/chat-x-midjourney-proxy",
+    "description": "The midjourney-proxy build top of Reactphp",
+    "keywords": ["Reactphp", "framework", "midjourney-proxy"],
     "homepage": "https://reactphp-x.com",
     "type": "project",
     "license": "MIT",
     "support": {
-        "issues": "https://github.com/reactphp-x/reactphp-x/issues",
-        "source": "https://github.com/reactphp-x/reactphp-x"
+        "issues": "https://github.com/chatgpt-x-hub/chat-x-midjourney-proxy/issues",
+        "source": "https://github.com/chatgpt-x-hub/chat-x-midjourney-proxy"
     },
     "authors": [
         {
-            "name": "Nuno Maduro",
-            "email": "enunomaduro@gmail.com"
+            "name": "wpjscc",
+            "email": "wpjscc@gmail.com"
         }
     ],
     "require": {

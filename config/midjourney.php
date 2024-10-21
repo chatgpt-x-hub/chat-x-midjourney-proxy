@@ -31,7 +31,7 @@ return [
     ],
     'settings' => [
         'debug' => false,  // 调试模式会显示更多信息在终端
-        'secret' => env('MJ-API-SECRET', ''),    // 接口密钥，不为空时需要在请求头 mj-api-secret 中传递
+        'secret' => env('MJ_API_SECRET', ''),    // 接口密钥，不为空时需要在请求头 mj-api-secret 中传递
         'notifyUrl' => env('MI_NOTIFY_URL', ''), // webman ai项目请留空
         'apiPrefix' => env('MJ_API_PREFIX', ''), // 接口前缀
         'tmpPath' => storage_path('app') . '/tmp/midjourney' // 上传文件临时目录
