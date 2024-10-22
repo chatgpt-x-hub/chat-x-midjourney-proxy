@@ -65,7 +65,15 @@ Route::group(
                     ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
                 }
             }
-            return \React\Async\async(fn() => $next($request))();
+            return \React\Async\async(fn() => $next($request))()->then(null, function ($e) {
+                return new Response(200, ['Content-Type' => 'application/json'], json_encode([
+                    'code' => 500,
+                    'msg' => $e->getMessage(),
+                    'taskId' => null,
+                    'data' => [],
+                    'ban-words' => $e->banWord ?? ''
+                ], JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE));
+            });
         } catch (Throwable $e) {
             return new Response(200, ['Content-Type' => 'application/json'], json_encode([
                 'code' => 500,
