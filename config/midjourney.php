@@ -12,7 +12,7 @@ return [
             'channel_id' => env('DISCORD_CHANNEL_ID', ''),
             'useragent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.30 (KHTML, like Gecko) Chrome/121.0.0.0 Safari/537.30',
             'concurrency' => 3, // 并发数
-            'timeoutMinutes' => 10, // 10分钟后超时
+            'timeoutMinutes' => 5, // 10分钟后超时
         ]
     ],
     'http_proxy' => env('MIDJOURNEY_HTTP_PROXY', '10.10.10.2:7890'), // http 代理

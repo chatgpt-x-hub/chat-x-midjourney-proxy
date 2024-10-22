@@ -251,7 +251,7 @@ class Discord
 
     protected function createTimeoutTimer()
     {
-        Loop::addTimer(60, \React\Async\async(function () {
+        Loop::addPeriodicTimer(60, \React\Async\async(function () {
             foreach ($this->getRunningTasks() as $task) {
                 if ($task->startTime() + $this->timeoutMinutes * 60 < time()) {
                      $task->removeFromList(static::getRunningListName($this->id));
