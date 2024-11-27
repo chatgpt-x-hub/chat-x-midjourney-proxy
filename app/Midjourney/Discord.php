@@ -244,6 +244,15 @@ class Discord
 
         }, function ($e) {
             Log::error("DISCORD:{$this->id()} WSS Connect Error " . $e->getMessage());
+            $this->heartbeatAck = true;
+            if ($this->gatewayConnection) {
+                $this->gatewayConnection->reconnect(1);
+            } else {
+                Loop::addTimer(1, \React\Async\async(function () {
+                    $this->createWss();
+                }));
+            }
+
         });
 
         Log::debug("DISCORD:{$this->id()} WSS Connecting...");
