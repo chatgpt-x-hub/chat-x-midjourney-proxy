@@ -476,7 +476,7 @@ class Discord
         return $availableInstances[0];
     }
 
-    public static function get(string $instanceId = null)
+    public static function get(?string $instanceId = null)
     {
         if ($instanceId) {
             return static::$instances[$instanceId] ?? null;
